@@ -1,28 +1,56 @@
-import MixedSchema, { create as mixedCreate } from './mixed';
-import BooleanSchema, { create as boolCreate } from './boolean';
-import StringSchema, { create as stringCreate } from './string';
-import NumberSchema, { create as numberCreate } from './number';
-import DateSchema, { create as dateCreate } from './date';
-import ObjectSchema, { AnyObject, create as objectCreate } from './object';
-import ArraySchema, { create as arrayCreate } from './array';
-import { create as refCreate } from './Reference';
-import Lazy, { create as lazyCreate } from './Lazy';
-import ValidationError from './ValidationError';
-import reach from './util/reach';
-import isSchema from './util/isSchema';
-import setLocale from './setLocale';
-import BaseSchema, { AnySchema } from './schema';
-import type { TypeOf, Asserts } from './util/types';
-import { Maybe } from './types';
-declare function addMethod<T extends AnySchema>(schemaType: (...arg: any[]) => T, name: string, fn: (this: T, ...args: any[]) => T): void;
-declare function addMethod<T extends new (...args: any) => AnySchema>(schemaType: T, name: string, fn: (this: InstanceType<T>, ...args: any[]) => InstanceType<T>): void;
-declare type ObjectSchemaOf<T extends AnyObject> = ObjectSchema<{
-    [k in keyof T]-?: T[k] extends Array<infer E> ? ArraySchema<SchemaOf<E> | Lazy<SchemaOf<E>>> : T[k] extends AnyObject ? // we can't use  ObjectSchema<{ []: SchemaOf<T[k]> }> b/c TS produces a union of two schema
-    ObjectSchemaOf<T[k]> | ObjectSchemaOf<Lazy<T[k]>> : BaseSchema<Maybe<T[k]>, AnyObject, T[k]>;
-}>;
-declare type SchemaOf<T> = T extends Array<infer E> ? ArraySchema<SchemaOf<E> | Lazy<SchemaOf<E>>> : T extends AnyObject ? ObjectSchemaOf<T> : BaseSchema<Maybe<T>, AnyObject, T>;
-export declare type AnyObjectSchema = ObjectSchema<any, any, any, any>;
-export type { SchemaOf, TypeOf, Asserts, Asserts as InferType, AnySchema };
-export { mixedCreate as mixed, boolCreate as bool, boolCreate as boolean, stringCreate as string, numberCreate as number, dateCreate as date, objectCreate as object, arrayCreate as array, refCreate as ref, lazyCreate as lazy, reach, isSchema, addMethod, setLocale, ValidationError, };
-export { BaseSchema, MixedSchema, BooleanSchema, StringSchema, NumberSchema, DateSchema, ObjectSchema, ArraySchema, };
-export type { CreateErrorOptions, TestContext, TestFunction, TestOptions, TestConfig, } from './util/createValidation';
+declare class Queue<ValueType> implements Iterable<ValueType> {
+	/**
+	The size of the queue.
+	*/
+	readonly size: number;
+
+	/**
+	Tiny queue data structure.
+
+	The instance is an [`Iterable`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols), which means you can iterate over the queue front to back with a “for…of” loop, or use spreading to convert the queue to an array. Don't do this unless you really need to though, since it's slow.
+
+	@example
+	```
+	import Queue = require('yocto-queue');
+
+	const queue = new Queue();
+
+	queue.enqueue('🦄');
+	queue.enqueue('🌈');
+
+	console.log(queue.size);
+	//=> 2
+
+	console.log(...queue);
+	//=> '🦄 🌈'
+
+	console.log(queue.dequeue());
+	//=> '🦄'
+
+	console.log(queue.dequeue());
+	//=> '🌈'
+	```
+	*/
+	constructor();
+
+	[Symbol.iterator](): IterableIterator<ValueType>;
+
+	/**
+	Add a value to the queue.
+	*/
+	enqueue(value: ValueType): void;
+
+	/**
+	Remove the next value in the queue.
+
+	@returns The removed value or `undefined` if the queue is empty.
+	*/
+	dequeue(): ValueType | undefined;
+
+	/**
+	Clear the queue.
+	*/
+	clear(): void;
+}
+
+export = Queue;

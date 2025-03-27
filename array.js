@@ -1,34 +1,16 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.create = create;
-exports.default = void 0;
-
-var _isAbsent = _interopRequireDefault(require("./util/isAbsent"));
-
-var _isSchema = _interopRequireDefault(require("./util/isSchema"));
-
-var _printValue = _interopRequireDefault(require("./util/printValue"));
-
-var _locale = require("./locale");
-
-var _runTests = _interopRequireDefault(require("./util/runTests"));
-
-var _ValidationError = _interopRequireDefault(require("./ValidationError"));
-
-var _schema = _interopRequireDefault(require("./schema"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-function create(type) {
+import isAbsent from './util/isAbsent';
+import isSchema from './util/isSchema';
+import printValue from './util/printValue';
+import { array as locale } from './locale';
+import runTests from './util/runTests';
+import ValidationError from './ValidationError';
+import BaseSchema from './schema';
+export function create(type) {
   return new ArraySchema(type);
 }
-
-class ArraySchema extends _schema.default {
+export default class ArraySchema extends BaseSchema {
   constructor(type) {
     super({
       type: 'array'
@@ -89,7 +71,7 @@ class ArraySchema extends _schema.default {
 
     super._validate(_value, options, (err, value) => {
       if (err) {
-        if (!_ValidationError.default.isError(err) || endEarly) {
+        if (!ValidationError.isError(err) || endEarly) {
           return void callback(err, value);
         }
 
@@ -120,7 +102,7 @@ class ArraySchema extends _schema.default {
         tests[idx] = (_, cb) => innerType.validate(item, innerOptions, cb);
       }
 
-      (0, _runTests.default)({
+      runTests({
         sync,
         path,
         value,
@@ -148,13 +130,13 @@ class ArraySchema extends _schema.default {
   of(schema) {
     // FIXME: this should return a new instance of array without the default to be
     let next = this.clone();
-    if (!(0, _isSchema.default)(schema)) throw new TypeError('`array.of()` sub-schema must be a valid yup schema not: ' + (0, _printValue.default)(schema)); // FIXME(ts):
+    if (!isSchema(schema)) throw new TypeError('`array.of()` sub-schema must be a valid yup schema not: ' + printValue(schema)); // FIXME(ts):
 
     next.innerType = schema;
     return next;
   }
 
-  length(length, message = _locale.array.length) {
+  length(length, message = locale.length) {
     return this.test({
       message,
       name: 'length',
@@ -164,14 +146,14 @@ class ArraySchema extends _schema.default {
       },
 
       test(value) {
-        return (0, _isAbsent.default)(value) || value.length === this.resolve(length);
+        return isAbsent(value) || value.length === this.resolve(length);
       }
 
     });
   }
 
   min(min, message) {
-    message = message || _locale.array.min;
+    message = message || locale.min;
     return this.test({
       message,
       name: 'min',
@@ -182,14 +164,14 @@ class ArraySchema extends _schema.default {
 
       // FIXME(ts): Array<typeof T>
       test(value) {
-        return (0, _isAbsent.default)(value) || value.length >= this.resolve(min);
+        return isAbsent(value) || value.length >= this.resolve(min);
       }
 
     });
   }
 
   max(max, message) {
-    message = message || _locale.array.max;
+    message = message || locale.max;
     return this.test({
       message,
       name: 'max',
@@ -199,7 +181,7 @@ class ArraySchema extends _schema.default {
       },
 
       test(value) {
-        return (0, _isAbsent.default)(value) || value.length <= this.resolve(max);
+        return isAbsent(value) || value.length <= this.resolve(max);
       }
 
     });
@@ -237,8 +219,6 @@ class ArraySchema extends _schema.default {
   }
 
 }
-
-exports.default = ArraySchema;
 create.prototype = ArraySchema.prototype; //
 // Interfaces
 //

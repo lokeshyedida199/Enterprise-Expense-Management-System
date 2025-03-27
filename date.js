@@ -1,33 +1,17 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.create = create;
-exports.default = void 0;
-
-var _isodate = _interopRequireDefault(require("./util/isodate"));
-
-var _locale = require("./locale");
-
-var _isAbsent = _interopRequireDefault(require("./util/isAbsent"));
-
-var _Reference = _interopRequireDefault(require("./Reference"));
-
-var _schema = _interopRequireDefault(require("./schema"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 // @ts-ignore
+import isoParse from './util/isodate';
+import { date as locale } from './locale';
+import isAbsent from './util/isAbsent';
+import Ref from './Reference';
+import BaseSchema from './schema';
 let invalidDate = new Date('');
 
 let isDate = obj => Object.prototype.toString.call(obj) === '[object Date]';
 
-function create() {
+export function create() {
   return new DateSchema();
 }
-
-class DateSchema extends _schema.default {
+export default class DateSchema extends BaseSchema {
   constructor() {
     super({
       type: 'date'
@@ -35,7 +19,7 @@ class DateSchema extends _schema.default {
     this.withMutation(() => {
       this.transform(function (value) {
         if (this.isType(value)) return value;
-        value = (0, _isodate.default)(value); // 0 is a valid timestamp equivalent to 1970-01-01T00:00:00Z(unix epoch) or before.
+        value = isoParse(value); // 0 is a valid timestamp equivalent to 1970-01-01T00:00:00Z(unix epoch) or before.
 
         return !isNaN(value) ? new Date(value) : invalidDate;
       });
@@ -49,7 +33,7 @@ class DateSchema extends _schema.default {
   prepareParam(ref, name) {
     let param;
 
-    if (!_Reference.default.isRef(ref)) {
+    if (!Ref.isRef(ref)) {
       let cast = this.cast(ref);
       if (!this._typeCheck(cast)) throw new TypeError(`\`${name}\` must be a Date or a value that can be \`cast()\` to a Date`);
       param = cast;
@@ -60,7 +44,7 @@ class DateSchema extends _schema.default {
     return param;
   }
 
-  min(min, message = _locale.date.min) {
+  min(min, message = locale.min) {
     let limit = this.prepareParam(min, 'min');
     return this.test({
       message,
@@ -71,13 +55,13 @@ class DateSchema extends _schema.default {
       },
 
       test(value) {
-        return (0, _isAbsent.default)(value) || value >= this.resolve(limit);
+        return isAbsent(value) || value >= this.resolve(limit);
       }
 
     });
   }
 
-  max(max, message = _locale.date.max) {
+  max(max, message = locale.max) {
     var limit = this.prepareParam(max, 'max');
     return this.test({
       message,
@@ -88,15 +72,13 @@ class DateSchema extends _schema.default {
       },
 
       test(value) {
-        return (0, _isAbsent.default)(value) || value <= this.resolve(limit);
+        return isAbsent(value) || value <= this.resolve(limit);
       }
 
     });
   }
 
 }
-
-exports.default = DateSchema;
 DateSchema.INVALID_DATE = invalidDate;
 create.prototype = DateSchema.prototype;
 create.INVALID_DATE = invalidDate;

@@ -1,16 +1,5 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.create = create;
-exports.default = void 0;
-
-var _isSchema = _interopRequireDefault(require("./util/isSchema"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function create(builder) {
+import isSchema from './util/isSchema';
+export function create(builder) {
   return new Lazy(builder);
 }
 
@@ -21,7 +10,7 @@ class Lazy {
 
     this._resolve = (value, options = {}) => {
       let schema = this.builder(value, options);
-      if (!(0, _isSchema.default)(schema)) throw new TypeError('lazy() functions must return a valid schema');
+      if (!isSchema(schema)) throw new TypeError('lazy() functions must return a valid schema');
       return schema.resolve(options);
     };
 
@@ -67,5 +56,4 @@ class Lazy {
 
 }
 
-var _default = Lazy;
-exports.default = _default;
+export default Lazy;

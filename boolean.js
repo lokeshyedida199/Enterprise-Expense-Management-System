@@ -1,24 +1,10 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.create = create;
-exports.default = void 0;
-
-var _schema = _interopRequireDefault(require("./schema"));
-
-var _locale = require("./locale");
-
-var _isAbsent = _interopRequireDefault(require("./util/isAbsent"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function create() {
+import BaseSchema from './schema';
+import { boolean as locale } from './locale';
+import isAbsent from './util/isAbsent';
+export function create() {
   return new BooleanSchema();
 }
-
-class BooleanSchema extends _schema.default {
+export default class BooleanSchema extends BaseSchema {
   constructor() {
     super({
       type: 'boolean'
@@ -40,7 +26,7 @@ class BooleanSchema extends _schema.default {
     return typeof v === 'boolean';
   }
 
-  isTrue(message = _locale.boolean.isValue) {
+  isTrue(message = locale.isValue) {
     return this.test({
       message,
       name: 'is-value',
@@ -50,13 +36,13 @@ class BooleanSchema extends _schema.default {
       },
 
       test(value) {
-        return (0, _isAbsent.default)(value) || value === true;
+        return isAbsent(value) || value === true;
       }
 
     });
   }
 
-  isFalse(message = _locale.boolean.isValue) {
+  isFalse(message = locale.isValue) {
     return this.test({
       message,
       name: 'is-value',
@@ -66,13 +52,11 @@ class BooleanSchema extends _schema.default {
       },
 
       test(value) {
-        return (0, _isAbsent.default)(value) || value === false;
+        return isAbsent(value) || value === false;
       }
 
     });
   }
 
 }
-
-exports.default = BooleanSchema;
 create.prototype = BooleanSchema.prototype;
